@@ -36,6 +36,11 @@ class DotnetSlnSync
         bool itemInSlnSolution = slnSolution.FindItemById(item.Id) is not null;
         bool itemInSlnxSolution = slnxSolution.FindItemById(item.Id) is not null;
 
+        if (itemInSlnSolution && itemInSlnSolution)
+        {
+            return;
+        }
+
         SolutionModel solutionToAddTo = itemInSlnSolution ? slnxSolution : slnSolution;
         SolutionModel solutionToRemoveFrom = itemInSlnSolution ? slnSolution : slnxSolution;
 
@@ -43,7 +48,7 @@ class DotnetSlnSync
             itemInSlnSolution ? "\x1b[0;32m(✓) .SLN\x1b[0m" : "\x1b[0;31m (x) .SLN\x1b[0m",
             " ",
             itemInSlnxSolution ? "\x1b[0;32m(✓) .SLNX\x1b[0m" : "\x1b[0;31m (x) .SLNX\x1b[0m",
-            "\t", item.ActualDisplayName
+            "\t", item is SolutionProjectModel ? $"Project: {((SolutionProjectModel) item).FilePath}" : $"Folder: {((SolutionFolderModel) item).Path}"
         ];
         Console.WriteLine(string.Join("", lineTextBuilder));
 

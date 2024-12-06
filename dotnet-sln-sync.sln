@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-sln-sync", "dotnet-sln-sync.csproj", "{D5A0BBA7-79E3-7593-BC36-328DD3BFD12C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-sln-sync", "src\DotNetSlnSync\dotnet-sln-sync.csproj", "{C929F1B0-4241-EF30-C2BF-285D437E2418}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D5A0BBA7-79E3-7593-BC36-328DD3BFD12C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D5A0BBA7-79E3-7593-BC36-328DD3BFD12C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D5A0BBA7-79E3-7593-BC36-328DD3BFD12C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D5A0BBA7-79E3-7593-BC36-328DD3BFD12C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C929F1B0-4241-EF30-C2BF-285D437E2418}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C929F1B0-4241-EF30-C2BF-285D437E2418}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C929F1B0-4241-EF30-C2BF-285D437E2418}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C929F1B0-4241-EF30-C2BF-285D437E2418}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
