@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "dotnet-sln-sync": {
+      "version": "0.0.1",
+      "commands": [
+        "slnxsync"
+      ],
+      "rollForward": false
+    }
+  }
+}
