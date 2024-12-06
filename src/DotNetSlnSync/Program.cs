@@ -31,31 +31,42 @@ class DotnetSlnSync
         throw new Exception("Directory does not exist");
     }
 
+    static IEnumerable<T> GetDifference<T>(IEnumerable<T> slnValues, IEnumerable<T> slnxValues)
+    {
+        HashSet<T> slnValuesSet = slnValues.ToHashSet();
+        HashSet<T> slnxValuesSet = slnxValues.ToHashSet();
+        return slnValuesSet.Except(slnxValuesSet).Concat(slnxValuesSet.Except(slnValuesSet));
+    }
+
+    static string CreateConflictLineString(string type, string name, bool inSlnFile, bool inSlnxFile)
+    {
+        string[] stringBuilder = [
+            inSlnFile ? "\x1b[0;32m(✓) .SLN\x1b[0m" : "\x1b[0;31m (x) .SLN\x1b[0m",
+            " ",
+            inSlnxFile ? "\x1b[0;32m(✓) .SLNX\x1b[0m" : "\x1b[0;31m (x) .SLNX\x1b[0m",
+            $"\t {type}: {name}",
+            "\n\t \u001b[3m(+) Add to all solutions, (-) Remove from all solutions\u001b[0m\t"
+         ];
+        return string.Join(string.Empty, stringBuilder);
+    }
+    
     static void HandleItemDifferences(SolutionModel slnSolution, SolutionModel slnxSolution, SolutionItemModel item)
     {
         bool itemInSlnSolution = slnSolution.FindItemById(item.Id) is not null;
         bool itemInSlnxSolution = slnxSolution.FindItemById(item.Id) is not null;
-
         if (itemInSlnSolution && itemInSlnSolution)
         {
             return;
         }
-
         SolutionModel solutionToAddTo = itemInSlnSolution ? slnxSolution : slnSolution;
         SolutionModel solutionToRemoveFrom = itemInSlnSolution ? slnSolution : slnxSolution;
-
-        string[] lineTextBuilder = [
-            itemInSlnSolution ? "\x1b[0;32m(✓) .SLN\x1b[0m" : "\x1b[0;31m (x) .SLN\x1b[0m",
-            " ",
-            itemInSlnxSolution ? "\x1b[0;32m(✓) .SLNX\x1b[0m" : "\x1b[0;31m (x) .SLNX\x1b[0m",
-            "\t", item is SolutionProjectModel ? $"Project: {((SolutionProjectModel) item).FilePath}" : $"Folder: {((SolutionFolderModel) item).Path}"
-        ];
-        Console.WriteLine(string.Join("", lineTextBuilder));
-
-        Console.Write("\t \x1b[3m(+) Add to all solutions, (-) Remove from all solutions\x1b[0m\t");
+        Console.Write(CreateConflictLineString(
+            item is SolutionProjectModel ? "Project" : "Folder", 
+            item is SolutionProjectModel ? ((SolutionProjectModel) item).FilePath : ((SolutionFolderModel) item).Path,
+            itemInSlnSolution, 
+            itemInSlnxSolution));
         ConsoleKeyInfo action = Console.ReadKey();
         Console.WriteLine("\x1b[M\x1b[2k\x1b[M");
-
         switch (action.Key)
         {
             case ConsoleKey.OemPlus:
@@ -77,6 +88,58 @@ class DotnetSlnSync
                 {
                     solutionToRemoveFrom.RemoveProject((SolutionProjectModel) item);
                 }
+                break;
+            default:
+                break;
+        }
+    }
+
+    static void HandlePlatformDifference(SolutionModel slnSolution, SolutionModel slnxSolution, string platform)
+    {
+        bool platformInSlnSolution = slnSolution.Platforms.Contains(platform);
+        bool platformInSlnxSolution = slnxSolution.Platforms.Contains(platform);
+        SolutionModel solutionToAddTo = platformInSlnSolution ? slnxSolution : slnSolution;
+        SolutionModel solutionToRemoveFrom = platformInSlnSolution ? slnSolution : slnxSolution;
+        Console.Write(CreateConflictLineString(
+            "Platform",
+            platform,
+            platformInSlnSolution,
+            platformInSlnxSolution));
+        ConsoleKeyInfo action = Console.ReadKey();
+        Console.WriteLine("\x1b[M\x1b[2k\x1b[M");
+        switch (action.Key)
+        {
+            case ConsoleKey.OemPlus:
+                solutionToAddTo.AddPlatform(platform);
+                break;
+            case ConsoleKey.OemMinus:
+                solutionToRemoveFrom.RemovePlatform(platform);
+                break;
+            default:
+                break;
+        }
+    }    
+    
+    static void HandleBuildTypeDifference(SolutionModel slnSolution, SolutionModel slnxSolution, string buildType)
+    {
+        bool buildTypeInSlnSolution = slnSolution.BuildTypes.Contains(buildType);
+        bool buildTypeInSlnxSolution = slnxSolution.BuildTypes.Contains(buildType);
+        SolutionModel solutionToAddTo = buildTypeInSlnSolution ? slnxSolution : slnSolution;
+        SolutionModel solutionToRemoveFrom = buildTypeInSlnSolution ? slnSolution : slnxSolution;
+        Console.Write(CreateConflictLineString(
+            "Build Type",
+            buildType,
+            buildTypeInSlnSolution,
+            buildTypeInSlnxSolution));
+        ConsoleKeyInfo action = Console.ReadKey();
+        Console.WriteLine("\x1b[M\x1b[2k\x1b[M");
+        switch (action.Key)
+        {
+            case ConsoleKey.OemPlus:
+                solutionToAddTo.AddBuildType(buildType);
+                break;
+            case ConsoleKey.OemMinus:
+                solutionToRemoveFrom.RemoveBuildType(buildType);
                 break;
             default:
                 break;
@@ -112,29 +175,42 @@ class DotnetSlnSync
         SolutionModel slnSolution = await SolutionSerializers.SlnFileV12.OpenAsync(solutionFilePaths["sln"], CancellationToken.None);
         SolutionModel slnxSolution = await SolutionSerializers.SlnXml.OpenAsync(solutionFilePaths["slnx"], CancellationToken.None);
 
-        // Get solution items differences
-        HashSet<SolutionItemModel> slnSolutionItems = slnSolution.SolutionItems.ToHashSet();
-        HashSet<SolutionItemModel> slnxSolutionItems = slnxSolution.SolutionItems.ToHashSet();
-
-        // Get difference
-        var differentSolutionItems = slnSolutionItems.Except(slnxSolutionItems).Concat(slnxSolutionItems.Except(slnSolutionItems));
-        if (differentSolutionItems.Count() == 0)
+        // PLATFORMS
+        var differentSolutionPlatforms = GetDifference<string>(slnSolution.Platforms, slnxSolution.Platforms);
+        if (differentSolutionPlatforms.Count() > 0)
         {
-            Console.WriteLine("\x1b[0;32mNo differences found\x1b[0m");
+            Console.WriteLine("Platforms:");
+            foreach (string platform in differentSolutionPlatforms)
+            {
+                HandlePlatformDifference(slnSolution, slnxSolution, platform);
+            }
         }
-        else
+        
+        // BUILD TYPES
+        var differentBuildTypes = GetDifference<string>(slnSolution.BuildTypes, slnxSolution.BuildTypes);
+        if (differentBuildTypes.Count() > 0)
+        {
+            Console.WriteLine("Build Types:");
+            foreach (string buildType in differentBuildTypes)
+            {
+                HandleBuildTypeDifference(slnSolution, slnxSolution, buildType);
+            }
+        }
+
+        // SOLUTION ITEMS
+        var differentSolutionItems = GetDifference<SolutionItemModel>(slnSolution.SolutionItems, slnxSolution.SolutionItems);
+        if (differentSolutionItems.Count() > 0)
         {
             Console.WriteLine("Projects:");
             foreach (SolutionItemModel item in differentSolutionItems)
             {
                 HandleItemDifferences(slnSolution, slnxSolution, item);
             }
-
-            await SolutionSerializers.SlnFileV12.SaveAsync(solutionFilePaths["sln"], slnSolution, CancellationToken.None);
-            await SolutionSerializers.SlnXml.SaveAsync(solutionFilePaths["slnx"], slnxSolution, CancellationToken.None);
-
-            Console.WriteLine($"\x1b[0;32mUpdated files: {solutionFilePaths["sln"]} {solutionFilePaths["slnx"]} \x1b[0m");
         }
+
+        await SolutionSerializers.SlnFileV12.SaveAsync(solutionFilePaths["sln"], slnSolution, CancellationToken.None);
+        await SolutionSerializers.SlnXml.SaveAsync(solutionFilePaths["slnx"], slnxSolution, CancellationToken.None);
+        Console.WriteLine($"\x1b[0;32mUpdated files: {solutionFilePaths["sln"]} {solutionFilePaths["slnx"]} \x1b[0m");
         return 0;
     }
 }

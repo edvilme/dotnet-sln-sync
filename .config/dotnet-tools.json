@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "dotnet-sln-sync": {
-      "version": "0.0.3",
+      "version": "0.0.4",
       "commands": [
         "slnxsync"
       ],
