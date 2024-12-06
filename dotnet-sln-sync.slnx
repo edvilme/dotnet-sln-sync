@@ -4,5 +4,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="dotnet-sln-sync.csproj" Id="32660481-5b0e-4f4a-8ca1-f7c04f7141a1" />
+  <Project Path="dotnet-sln-sync.csproj" Id="a9c6dbff-e942-4843-a8da-a1f2085c28ec" />
 </Solution>
