@@ -11,7 +11,7 @@
     <ToolCommandName>slnxsync</ToolCommandName>
     <PackageOutputPath>$(SolutionDir)/nupkg</PackageOutputPath>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.0.5</Version>
+    <Version>0.0.6</Version>
 
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/edvilme/dotnet-sln-sync.git</RepositoryUrl> 
