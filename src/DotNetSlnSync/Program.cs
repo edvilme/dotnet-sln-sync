@@ -3,6 +3,18 @@ using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using System;
 
+class SolutionItemModelEqualityComparer : IEqualityComparer<SolutionItemModel>
+{
+    public bool Equals(SolutionItemModel? a, SolutionItemModel? b)
+    {
+        return ((SolutionItemModel?) a)?.Id.ToString() == ((SolutionItemModel?)b)?.Id.ToString();
+    }
+    public int GetHashCode(SolutionItemModel item)
+    {
+        return item.Id.ToString().GetHashCode();
+    }
+}
+
 class DotnetSlnSync
 {
     static Dictionary<string, string> FindSolutionFilesPairInDirectory(string directoryPath)
@@ -31,10 +43,10 @@ class DotnetSlnSync
         throw new Exception("Directory does not exist");
     }
 
-    static IEnumerable<T> GetDifference<T>(IEnumerable<T> slnValues, IEnumerable<T> slnxValues)
+    static IEnumerable<T> GetDifference<T>(IEnumerable<T> slnValues, IEnumerable<T> slnxValues, IEqualityComparer<T>? comparer = null)
     {
-        HashSet<T> slnValuesSet = slnValues.ToHashSet();
-        HashSet<T> slnxValuesSet = slnxValues.ToHashSet();
+        HashSet<T> slnValuesSet = slnValues.ToHashSet(comparer);
+        HashSet<T> slnxValuesSet = slnxValues.ToHashSet(comparer);
         return slnValuesSet.Except(slnxValuesSet).Concat(slnxValuesSet.Except(slnValuesSet));
     }
 
@@ -45,19 +57,36 @@ class DotnetSlnSync
             " ",
             inSlnxFile ? "\x1b[0;32m(✓) .SLNX\x1b[0m" : "\x1b[0;31m (x) .SLNX\x1b[0m",
             $"\t {type}: {name}",
-            "\n\t \u001b[3m(+) Add to all solutions, (-) Remove from all solutions\u001b[0m\t"
+            "\n\t \u001b[3m(+) Add to all solutions, (-) Remove from all solutions, (ESC) Ignore\u001b[0m\t"
          ];
         return string.Join(string.Empty, stringBuilder);
+    }
+
+    static void HandleKeyboardInput(Action onAdd, Action onRemove, Action onCancel)
+    {
+        ConsoleKeyInfo action = Console.ReadKey();
+        Console.WriteLine("\x1b[M\x1b[2k\x1b[M");
+        switch (action.Key)
+        {
+            case ConsoleKey.OemPlus:
+                onAdd();
+                break;
+            case ConsoleKey.OemMinus:
+                onRemove();
+                break;
+            case ConsoleKey.Escape:
+                onCancel();
+                break;
+            default:
+                break;
+        }
     }
     
     static void HandleItemDifferences(SolutionModel slnSolution, SolutionModel slnxSolution, SolutionItemModel item)
     {
         bool itemInSlnSolution = slnSolution.FindItemById(item.Id) is not null;
         bool itemInSlnxSolution = slnxSolution.FindItemById(item.Id) is not null;
-        if (itemInSlnSolution && itemInSlnSolution)
-        {
-            return;
-        }
+
         SolutionModel solutionToAddTo = itemInSlnSolution ? slnxSolution : slnSolution;
         SolutionModel solutionToRemoveFrom = itemInSlnSolution ? slnSolution : slnxSolution;
         Console.Write(CreateConflictLineString(
@@ -65,33 +94,31 @@ class DotnetSlnSync
             item is SolutionProjectModel ? ((SolutionProjectModel) item).FilePath : ((SolutionFolderModel) item).Path,
             itemInSlnSolution, 
             itemInSlnxSolution));
-        ConsoleKeyInfo action = Console.ReadKey();
-        Console.WriteLine("\x1b[M\x1b[2k\x1b[M");
-        switch (action.Key)
-        {
-            case ConsoleKey.OemPlus:
+
+        HandleKeyboardInput(
+            onAdd: () =>
+            {
                 if (item is SolutionFolderModel)
                 {
-                    solutionToAddTo.AddFolder(((SolutionFolderModel) item).Path);
+                    solutionToAddTo.AddFolder(((SolutionFolderModel)item).Path);
                 }
                 if (item is SolutionProjectModel)
                 {
                     solutionToAddTo.AddProject(((SolutionProjectModel)item).FilePath, ((SolutionProjectModel)item).TypeId.ToString(), ((SolutionProjectModel)item).Parent);
                 }
-                break;
-            case ConsoleKey.OemMinus:
+            },
+            onRemove: () =>
+            {
                 if (item is SolutionFolderModel)
                 {
-                    solutionToRemoveFrom.RemoveFolder((SolutionFolderModel) item);
+                    solutionToRemoveFrom.RemoveFolder((SolutionFolderModel)item);
                 }
                 if (item is SolutionProjectModel)
                 {
-                    solutionToRemoveFrom.RemoveProject((SolutionProjectModel) item);
+                    solutionToRemoveFrom.RemoveProject((SolutionProjectModel)item);
                 }
-                break;
-            default:
-                break;
-        }
+            },
+            onCancel: () => { return; });
     }
 
     static void HandlePlatformDifference(SolutionModel slnSolution, SolutionModel slnxSolution, string platform)
@@ -105,19 +132,11 @@ class DotnetSlnSync
             platform,
             platformInSlnSolution,
             platformInSlnxSolution));
-        ConsoleKeyInfo action = Console.ReadKey();
-        Console.WriteLine("\x1b[M\x1b[2k\x1b[M");
-        switch (action.Key)
-        {
-            case ConsoleKey.OemPlus:
-                solutionToAddTo.AddPlatform(platform);
-                break;
-            case ConsoleKey.OemMinus:
-                solutionToRemoveFrom.RemovePlatform(platform);
-                break;
-            default:
-                break;
-        }
+
+        HandleKeyboardInput(
+            onAdd: () => solutionToAddTo.AddPlatform(platform),
+            onRemove: () => solutionToRemoveFrom.RemovePlatform(platform),
+            onCancel: () => { return; });
     }    
     
     static void HandleBuildTypeDifference(SolutionModel slnSolution, SolutionModel slnxSolution, string buildType)
@@ -131,19 +150,11 @@ class DotnetSlnSync
             buildType,
             buildTypeInSlnSolution,
             buildTypeInSlnxSolution));
-        ConsoleKeyInfo action = Console.ReadKey();
-        Console.WriteLine("\x1b[M\x1b[2k\x1b[M");
-        switch (action.Key)
-        {
-            case ConsoleKey.OemPlus:
-                solutionToAddTo.AddBuildType(buildType);
-                break;
-            case ConsoleKey.OemMinus:
-                solutionToRemoveFrom.RemoveBuildType(buildType);
-                break;
-            default:
-                break;
-        }
+
+        HandleKeyboardInput(
+            onAdd: () => solutionToAddTo.AddBuildType(buildType),
+            onRemove: () => solutionToRemoveFrom.RemoveBuildType(buildType),
+            onCancel: () => { return; });
     }
 
     static async Task<int> Main(string[] args)
@@ -198,7 +209,7 @@ class DotnetSlnSync
         }
 
         // SOLUTION ITEMS
-        var differentSolutionItems = GetDifference<SolutionItemModel>(slnSolution.SolutionItems, slnxSolution.SolutionItems);
+        var differentSolutionItems = GetDifference<SolutionItemModel>(slnSolution.SolutionItems, slnxSolution.SolutionItems, new SolutionItemModelEqualityComparer());
         if (differentSolutionItems.Count() > 0)
         {
             Console.WriteLine("Projects:");

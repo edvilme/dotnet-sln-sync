@@ -6,14 +6,21 @@
     <RootNamespace>dotnet_sln_sync</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackAsTool>true</PackAsTool>
+    <IsPublishable>True</IsPublishable>
+    <PackAsTool>True</PackAsTool>
     <ToolCommandName>slnxsync</ToolCommandName>
-    <PackageOutputPath>../../nupkg</PackageOutputPath>
+    <PackageOutputPath>$(SolutionDir)/nupkg</PackageOutputPath>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>0.0.5</Version>
+
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/edvilme/dotnet-sln-sync.git</RepositoryUrl> 
+    <RepositoryType>git</RepositoryType> 
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.26" />
+    <None Include="../../README.md" Pack="true" PackagePath="\"></None>
   </ItemGroup>
 
 </Project>
