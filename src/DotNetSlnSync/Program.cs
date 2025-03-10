@@ -3,18 +3,6 @@ using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using System;
 
-class SolutionItemModelEqualityComparer : IEqualityComparer<SolutionItemModel>
-{
-    public bool Equals(SolutionItemModel? a, SolutionItemModel? b)
-    {
-        return ((SolutionItemModel?) a)?.Id.ToString() == ((SolutionItemModel?)b)?.Id.ToString();
-    }
-    public int GetHashCode(SolutionItemModel item)
-    {
-        return item.Id.ToString().GetHashCode();
-    }
-}
-
 class DotnetSlnSync
 {
     static Dictionary<string, string> FindSolutionFilesPairInDirectory(string directoryPath)
@@ -27,7 +15,7 @@ class DotnetSlnSync
             int slnFileCount = slnFilePaths.Length;
             int slnxFileCount = slnxFilePaths.Length;
 
-            if (slnFileCount * slnFileCount == 1)
+            if (slnFileCount * slnxFileCount == 1)
             {
                 return new Dictionary<string, string>
                 {
@@ -47,7 +35,7 @@ class DotnetSlnSync
     {
         HashSet<T> slnValuesSet = slnValues.ToHashSet(comparer);
         HashSet<T> slnxValuesSet = slnxValues.ToHashSet(comparer);
-        return slnValuesSet.Except(slnxValuesSet).Concat(slnxValuesSet.Except(slnValuesSet));
+        return slnValuesSet.Except(slnxValuesSet, comparer).Concat(slnxValuesSet.Except(slnValuesSet, comparer));
     }
 
     static string CreateConflictLineString(string type, string name, bool inSlnFile, bool inSlnxFile)
@@ -74,10 +62,8 @@ class DotnetSlnSync
             case ConsoleKey.OemMinus:
                 onRemove();
                 break;
-            case ConsoleKey.Escape:
-                onCancel();
-                break;
             default:
+                onCancel();
                 break;
         }
     }
@@ -221,7 +207,7 @@ class DotnetSlnSync
 
         await SolutionSerializers.SlnFileV12.SaveAsync(solutionFilePaths["sln"], slnSolution, CancellationToken.None);
         await SolutionSerializers.SlnXml.SaveAsync(solutionFilePaths["slnx"], slnxSolution, CancellationToken.None);
-        Console.WriteLine($"\x1b[0;32mUpdated files: {solutionFilePaths["sln"]} {solutionFilePaths["slnx"]} \x1b[0m");
+        Console.WriteLine($"\x1b[0;32mSynced solutions: {solutionFilePaths["sln"]} {solutionFilePaths["slnx"]} \x1b[0m");
         return 0;
     }
 }
