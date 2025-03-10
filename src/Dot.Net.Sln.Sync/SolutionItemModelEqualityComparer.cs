@@ -19,6 +19,14 @@ public class SolutionItemModelEqualityComparer : IEqualityComparer<SolutionItemM
     {
         // Use the same properties from Equals(...) to build a consistent hash
         // e.g. return HashCode.Combine(obj.Id, obj.Name);
+        if (obj is SolutionProjectModel objProject)
+        {
+            return objProject.FilePath.GetHashCode();
+        }
+        if (obj is SolutionFolderModel objFolder)
+        {
+            return objFolder.ActualDisplayName.GetHashCode();
+        }
         return obj.Id.GetHashCode();
     }
 }
