@@ -26,6 +26,11 @@ slnxsync <SLN_FILE> <SLNX_FILE>
 
 When working with teams, it might be useful to create a [git hook](https://git-scm.com/docs/githooks) that calls this tool on commit, or before pushing to ensure no discrepancies exist between the files. 
 
+```bash
+echo "#!/bin/sh" >> .git/hooks/pre-commit
+echo slnxsync >> .git/hooks/pre-commit
+```
+
 ## Contributing
 This is an experimental tool, but feel free to create new issues or pull requests. 
 
