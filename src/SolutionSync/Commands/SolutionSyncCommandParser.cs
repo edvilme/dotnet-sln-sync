@@ -21,12 +21,6 @@ public class SolutionSyncCommandParser
         Arity = new(0, 2)
     };
 
-    public static Option<string> OverrideFromOption = new Option<string>("--override-from")
-    {
-        Description = "The solution file to override from.",
-        ArgumentHelpName = "OverrideFrom"
-    };
-
     public static Option<bool> DiffOnlyOption = new Option<bool>("--diff-only")
     {
         Description = "Only show the differences between the two solution files.",
@@ -36,7 +30,6 @@ public class SolutionSyncCommandParser
     static SolutionSyncCommandParser()
     {
         RootCommand.AddArgument(SolutionFilesPathsArgument);
-        RootCommand.AddOption(OverrideFromOption);
         RootCommand.AddOption(DiffOnlyOption);
 
         RootCommand.SetHandler((InvocationContext context) =>

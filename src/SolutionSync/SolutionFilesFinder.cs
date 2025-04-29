@@ -11,7 +11,7 @@ namespace SolutionSync;
 
 internal static class SolutionFilesFinder
 {
-    public static string GetSolutionPathFromFileOrDirectory(string fileOrDirectoryPath)
+    public static string GetSingleSolutionPathFromFileOrDirectory(string fileOrDirectoryPath)
     {
         if (File.Exists(fileOrDirectoryPath)
             && (fileOrDirectoryPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) || fileOrDirectoryPath.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase)))
@@ -21,8 +21,16 @@ internal static class SolutionFilesFinder
 
         if (Directory.Exists(fileOrDirectoryPath))
         {
-            return Directory.GetFiles(fileOrDirectoryPath, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault()
-                ?? Directory.GetFiles(fileOrDirectoryPath, "*.slnx", SearchOption.TopDirectoryOnly).FirstOrDefault()
+            string[] slnFiles = Directory.GetFiles(fileOrDirectoryPath, "*.sln", SearchOption.TopDirectoryOnly);
+            string[] slnxFiles = Directory.GetFiles(fileOrDirectoryPath, "*.slnx", SearchOption.TopDirectoryOnly);
+
+            if (slnFiles.Length * slnxFiles.Length > 0)
+            {
+                throw new InvalidOperationException("Both .sln and .slnx files were found in the directory. Only one type of solution file is allowed.");
+            }
+
+            return slnFiles.FirstOrDefault()
+                ?? slnxFiles.FirstOrDefault()
                 ?? throw new FileNotFoundException(fileOrDirectoryPath);
         }
 
@@ -35,10 +43,8 @@ internal static class SolutionFilesFinder
         {
             string[] slnFilePaths = Directory.GetFiles(directoryPath, "*.sln", SearchOption.TopDirectoryOnly);
             string[] slnxFilePaths = Directory.GetFiles(directoryPath, "*.slnx", SearchOption.TopDirectoryOnly);
-            int slnFileCount = slnFilePaths.Length;
-            int slnxFileCount = slnxFilePaths.Length;
 
-            if (slnFileCount * slnxFileCount == 1)
+            if (slnFilePaths.Length * slnxFilePaths.Length == 1)
             {
                 return new Dictionary<string, string>{
                     {".sln", slnFilePaths.First()},
@@ -61,8 +67,8 @@ internal static class SolutionFilesFinder
 
         if (paths.Length == 2)
         {
-            string? solutionA = GetSolutionPathFromFileOrDirectory(paths[0]);
-            string? solutionB = GetSolutionPathFromFileOrDirectory(paths[1]);
+            string? solutionA = GetSingleSolutionPathFromFileOrDirectory(paths[0]);
+            string? solutionB = GetSingleSolutionPathFromFileOrDirectory(paths[1]);
 
             string solutionAExtension = Path.GetExtension(solutionA);
             string solutionBExtension = Path.GetExtension(solutionB);

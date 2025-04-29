@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.SolutionPersistence.Model;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SolutionSync.Comparer;
+namespace SolutionSync;
 
 internal class SolutionItemModelEqualityComparer : IEqualityComparer<SolutionItemModel>
 {
@@ -9,12 +9,12 @@ internal class SolutionItemModelEqualityComparer : IEqualityComparer<SolutionIte
     {
         if (x is SolutionProjectModel xProject && y is SolutionProjectModel yProject)
         {
-            return Path.Equals(xProject.FilePath, yProject.FilePath)
+            return Equals(xProject.FilePath, yProject.FilePath)
                 && Equals(xProject.Parent, yProject.Parent);
         }
         if (x is SolutionFolderModel xFolder && y is SolutionFolderModel yFolder)
         {
-            return Path.Equals(xFolder.Path, yFolder.Path);
+            return Equals(xFolder.Path, yFolder.Path);
         }
         return x?.Id == y?.Id;
     }
