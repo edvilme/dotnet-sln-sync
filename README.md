@@ -1,8 +1,23 @@
-# `dotnet slnxsync`
+<img src="Icon.png" height="100px" />
+
+# VS Solution Syncing: `dotnet slnsync`
 
 Use this .NET Tool to manually sync .sln and .slnx solution files.
 
 [![NuGet package](https://img.shields.io/nuget/v/dotnet-sln-sync.svg)](https://nuget.org/packages/dotnet-sln-sync)
+
+## Installation
+Download as a global tool via NuGet
+```bash
+dotnet tool install -g dotnet-sln-sync
+```
+
+## Usage
+The tool will be available to use as `dotnet slnsync`. 
+```
+dotnet slnsync [<DIRECTORY>] [--diff-only]
+dotnet slnsync <FILE_OR_DIR> <FILE_OR_DIR> [--diff-only]
+```
 
 The tool will prompt you to add or remove the projects/solution folders from the solution files, one by one.
 
@@ -12,17 +27,6 @@ After execution, both files should have the same projects and solution folders.
 
 ![image](https://github.com/user-attachments/assets/3af596d7-e092-44cb-a980-8010cbb67777)
 
-## Installation
-This tool is available to download via NuGet
-```bash
-dotnet tool install --global dotnet-sln-sync
-```
-
-## Usage
-Call this tool manually
-```bash
-slnxsync <SLN_FILE> <SLNX_FILE>
-```
 
 When working with teams, it might be useful to create a [git hook](https://git-scm.com/docs/githooks) that calls this tool on commit, or before pushing to ensure no discrepancies exist between the files. 
 
@@ -35,5 +39,6 @@ echo slnxsync >> .git/hooks/pre-commit
 This is an experimental tool, but feel free to create new issues or pull requests. 
 
 
-# Dependencies
-This project uses [vs-solutionpersistence](https://github.com/microsoft/vs-solutionpersistence)
+## Dependencies
+This project uses [vs-solutionpersistence](https://github.com/microsoft/vs-solutionpersistence) for sln(x) parsing. 
+

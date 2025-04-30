@@ -17,10 +17,18 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/edvilme/dotnet-sln-sync</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageIcon>Icon.png</PackageIcon>
+    <PackageTags>sln, slnx, solution</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(SolutionDir)README.md" Pack="true" PackagePath="\" />
+    <None Include="$(SolutionDir)LICENSE" Pack="true" PackagePath="\" />
+    <None Include="$(SolutionDir)Icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>
