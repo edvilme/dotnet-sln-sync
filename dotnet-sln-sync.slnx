@@ -6,6 +6,6 @@
     <Platform Name="arm64" />
   </Configurations>
   <Folder Name="/src/">
-    <Project Path="src/SolutionSync/SolutionSync.csproj" />
+    <Project Path="src/SolutionSync/dotnet-sln-sync.csproj" />
   </Folder>
 </Solution>
