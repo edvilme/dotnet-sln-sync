@@ -1,0 +1,28 @@
+# This workflow will publish a .NET project to NuGet
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Publish to NuGet
+
+on:
+    push:
+        branches: [ "main" ]
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v4
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 9.0.x
+        - name: Restore dependencies
+          run: dotnet restore ./dotnet-sln-sync.slnx
+        - name: Build
+          run: dotnet build ./dotnet-sln-sync.slnx --no-restore --configuration Release
+        - name: Pack
+          run: dotnet pack ./dotnet-sln-sync.slnx --no-build --configuration Release --output ./nupkgs ./src/SolutionSync/dotnet-sln-sync.csproj # Adjust the path to your project file as needed
+        - name: Publish to NuGet
+          env:
+            NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          run: dotnet nuget push ./nupkgs/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json # Adjust the path to your nupkg files as needed

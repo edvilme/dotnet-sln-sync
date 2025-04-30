@@ -1,24 +1,26 @@
-using Microsoft.VisualStudio.SolutionPersistence.Model;
+﻿using Microsoft.VisualStudio.SolutionPersistence.Model;
+using System.Diagnostics.CodeAnalysis;
 
-public class SolutionItemModelEqualityComparer : IEqualityComparer<SolutionItemModel>
+namespace SolutionSync;
+
+internal class SolutionItemModelEqualityComparer : IEqualityComparer<SolutionItemModel>
 {
     public bool Equals(SolutionItemModel? x, SolutionItemModel? y)
     {
         if (x is SolutionProjectModel xProject && y is SolutionProjectModel yProject)
         {
-            return xProject.FilePath == yProject.FilePath;
+            return Equals(xProject.FilePath, yProject.FilePath)
+                && Equals(xProject.Parent, yProject.Parent);
         }
         if (x is SolutionFolderModel xFolder && y is SolutionFolderModel yFolder)
         {
-            return xFolder.ActualDisplayName == yFolder.ActualDisplayName;
+            return Equals(xFolder.Path, yFolder.Path);
         }
         return x?.Id == y?.Id;
     }
 
-    public int GetHashCode(SolutionItemModel obj)
+    public int GetHashCode([DisallowNull] SolutionItemModel obj)
     {
-        // Use the same properties from Equals(...) to build a consistent hash
-        // e.g. return HashCode.Combine(obj.Id, obj.Name);
         if (obj is SolutionProjectModel objProject)
         {
             return objProject.FilePath.GetHashCode();
