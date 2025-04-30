@@ -8,10 +8,10 @@
 
 	  <PackAsTool>true</PackAsTool>
     <IsPublishable>true</IsPublishable>
-    <ToolCommandName>slnsync</ToolCommandName>
+    <ToolCommandName>dotnet-slnsync</ToolCommandName>
     <PackageOutputPath>$(SolutionDir)/nupkg/</PackageOutputPath>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>2.0.0-preview</Version>
+    <Version>2.0.0</Version>
     <Authors>Eduardo Villalpando</Authors>
 
     <PackageReadmeFile>README.md</PackageReadmeFile>
