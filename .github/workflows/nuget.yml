@@ -21,7 +21,7 @@ jobs:
         - name: Build
           run: dotnet build ./dotnet-sln-sync.slnx --no-restore --configuration Release
         - name: Pack
-          run: dotnet pack ./dotnet-sln-sync.slnx --no-build --configuration Release --output ./nupkgs ./src/SolutionSync/dotnet-sln-sync.csproj # Adjust the path to your project file as needed
+          run: dotnet pack ./dotnet-sln-sync.slnx --no-build --configuration Release --output ./nupkgs
         - name: Publish to NuGet
           env:
             NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
