@@ -18,7 +18,7 @@ internal class SolutionSyncCommand(
     private bool hasDifferences = false;
     private bool hasChanges = false;
 
-    public static void PrintDiff<T>((string Included, string Excluded, T obj) item, string aName, string bName, Func<T, string>? toStringFunc = null)
+    private static void PrintDiff<T>((string Included, string Excluded, T obj) item, string aName, string bName, Func<T, string>? toStringFunc = null)
     {
         string aNameQualifier = item.Included == aName ? "\x1b[0;32m+" : "\x1b[0;31m-";
         string bNameQualifier = item.Included == bName ? "\x1b[0;32m+" : "\x1b[0;31m-";
@@ -29,7 +29,7 @@ internal class SolutionSyncCommand(
         Console.WriteLine($"{bNameQualifier} {bName}:\t{objRepresentation}\x1b[0m");
     }
 
-    public void UpdateSolutionDifferences(SolutionModel solutionIncludingItem, SolutionModel solutionNotIncludingItem, Action<SolutionModel>? addFunction, Action<SolutionModel>? removeFunction)
+    private void UpdateSolutionDifferences(SolutionModel solutionIncludingItem, SolutionModel solutionNotIncludingItem, Action<SolutionModel>? addFunction, Action<SolutionModel>? removeFunction)
     {
         if (diffOnly)
         {
@@ -37,7 +37,7 @@ internal class SolutionSyncCommand(
             return;
         }
 
-        Console.Write($"\t[A]dd to both, [R]emove from both, or [S]kip? (default: S): ");
+        Console.Write($"\t[A] Add to both, [R] Remove from both, or [S] Skip? (default: S): ");
         ConsoleKey key = Console.ReadKey(true).Key;
         switch (key)
         {
