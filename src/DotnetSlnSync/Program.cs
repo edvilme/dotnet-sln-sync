@@ -1,12 +1,12 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Parsing;
 
-namespace SolutionSync;
+namespace DotnetSlnSync;
 
 class Program
 {
     static int Main(string[] args)
     {
-        return SolutionSync.Commands.SolutionSyncCommandParser.CommandParser.Invoke(args);
+        return DotnetSlnSync.Commands.SolutionSyncCommandParser.CommandParser.Invoke(args);
     }
 }

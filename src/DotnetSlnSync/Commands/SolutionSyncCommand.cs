@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SolutionSync.Commands;
+namespace DotnetSlnSync.Commands;
 
 internal class SolutionSyncCommand(
     ParseResult parseResult) : CommandBase(parseResult)

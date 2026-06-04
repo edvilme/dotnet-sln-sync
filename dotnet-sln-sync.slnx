@@ -1,4 +1,4 @@
-<Solution Description=".\dotnet-sln-sync.slnx">
+﻿<Solution Description=".\dotnet-sln-sync.slnx">
   <Configurations>
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
@@ -6,6 +6,6 @@
     <Platform Name="arm64" />
   </Configurations>
   <Folder Name="/src/">
-    <Project Path="src/SolutionSync/dotnet-sln-sync.csproj" />
+    <Project Path="src/DotnetSlnSync/DotnetSlnSync.csproj" />
   </Folder>
 </Solution>

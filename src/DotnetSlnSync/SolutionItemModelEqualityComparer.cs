@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.SolutionPersistence.Model;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SolutionSync;
+namespace DotnetSlnSync;
 
 internal class SolutionItemModelEqualityComparer : IEqualityComparer<SolutionItemModel>
 {
