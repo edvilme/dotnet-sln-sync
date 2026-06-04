@@ -1,0 +1,83 @@
+name: Weekly Version Bump PR
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-version-bump-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Check unreleased changes
+        id: check
+        shell: bash
+        run: |
+          PROJECT_FILE="src/DotnetSlnSync/DotnetSlnSync.csproj"
+          CURRENT_VERSION=$(grep -oP '<Version>\K[^<]+' "$PROJECT_FILE" || true)
+          LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+
+          if [ -z "$CURRENT_VERSION" ]; then
+            echo "::error::Could not extract current version."
+            exit 1
+          fi
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No release tag found. Skipping automated version bump."
+            echo "create_pr=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          TAG_VERSION="${LATEST_TAG#v}"
+          if [ "$CURRENT_VERSION" != "$TAG_VERSION" ]; then
+            echo "Version already differs from latest release tag ($TAG_VERSION)."
+            echo "create_pr=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          COMMITS_SINCE_TAG=$(git rev-list --count "$LATEST_TAG"..HEAD)
+          if [ "$COMMITS_SINCE_TAG" -eq 0 ]; then
+            echo "No unreleased commits since $LATEST_TAG."
+            echo "create_pr=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
+            echo "::error::Version '$CURRENT_VERSION' is not in major.minor.patch format."
+            exit 1
+          fi
+
+          NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+
+          echo "create_pr=true" >> "$GITHUB_OUTPUT"
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update version in csproj
+        if: steps.check.outputs.create_pr == 'true'
+        shell: bash
+        run: |
+          PROJECT_FILE="src/DotnetSlnSync/DotnetSlnSync.csproj"
+          NEW_VERSION="${{ steps.check.outputs.new_version }}"
+          perl -0pi -e "s|<Version>[^<]+</Version>|<Version>${NEW_VERSION}</Version>|" "$PROJECT_FILE"
+
+      - name: Create pull request
+        if: steps.check.outputs.create_pr == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ github.token }}
+          commit-message: "chore: bump version to ${{ steps.check.outputs.new_version }}"
+          title: "chore: bump version to ${{ steps.check.outputs.new_version }}"
+          body: |
+            Automated weekly version bump because unreleased commits were detected on main.
+          base: main
+          branch: "automation/version-bump-${{ steps.check.outputs.new_version }}"
