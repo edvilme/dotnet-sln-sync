@@ -21,8 +21,8 @@ jobs:
         - name: Build
           run: dotnet build ./dotnet-sln-sync.slnx --no-restore --configuration Release
         - name: Pack
-          run: dotnet pack ./dotnet-sln-sync.slnx --no-build --configuration Release --output ./nupkgs
+          run: dotnet pack ./dotnet-sln-sync.slnx --no-build --configuration Release --output ./nupkg
         - name: Publish to NuGet
           env:
             NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-          run: dotnet nuget push ./nupkgs/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json # Adjust the path to your nupkg files as needed
+          run: dotnet nuget push ./nupkg/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json # Adjust the path to your nupkg files as needed

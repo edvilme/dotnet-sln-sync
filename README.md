@@ -1,6 +1,6 @@
-<img src="Icon.png" height="100px" />
+﻿<img src="Icon.png" height="100px" />
 
-# VS Solution Syncing: `dotnet slnsync`
+# VS Solution Syncing: `dotnet sln-sync`
 
 Use this .NET Tool to manually sync .sln and .slnx solution files.
 
@@ -13,10 +13,10 @@ dotnet tool install -g dotnet-sln-sync
 ```
 
 ## Usage
-The tool will be available to use as `dotnet slnsync`. 
+The tool will be available to use as `dotnet sln-sync`. 
 ```
-dotnet slnsync [<DIRECTORY>] [--diff-only]
-dotnet slnsync <FILE_OR_DIR> <FILE_OR_DIR> [--diff-only]
+dotnet sln-sync [<DIRECTORY>] [--diff-only]
+dotnet sln-sync <FILE_OR_DIR> <FILE_OR_DIR> [--diff-only]
 ```
 
 The tool will prompt you to add or remove the projects/solution folders from the solution files, one by one.
@@ -32,7 +32,7 @@ When working with teams, it might be useful to create a [git hook](https://git-s
 
 ```bash
 echo "#!/bin/sh" >> .git/hooks/pre-commit
-echo slnxsync >> .git/hooks/pre-commit
+echo "dotnet sln-sync --diff-only" >> .git/hooks/pre-commit
 ```
 
 ## Contributing
