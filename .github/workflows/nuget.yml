@@ -6,6 +6,10 @@ name: Publish to NuGet
 on:
     push:
         branches: [ "main" ]
+    workflow_dispatch:
+
+permissions:
+    contents: write
 
 jobs:
     publish:
@@ -20,9 +24,24 @@ jobs:
           run: dotnet restore ./dotnet-sln-sync.slnx
         - name: Build
           run: dotnet build ./dotnet-sln-sync.slnx --no-restore --configuration Release
+        - name: Test
+          run: dotnet test ./dotnet-sln-sync.slnx --no-build --configuration Release --verbosity normal
         - name: Pack
           run: dotnet pack ./dotnet-sln-sync.slnx --no-build --configuration Release --output ./nupkgs
         - name: Publish to NuGet
           env:
             NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-          run: dotnet nuget push ./nupkgs/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json # Adjust the path to your nupkg files as needed
+          run: dotnet nuget push ./nupkgs/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+        - name: Get version
+          id: get_version
+          run: |
+            VERSION=$(grep -oP '<Version>\K[^<]+' src/SolutionSync/dotnet-sln-sync.csproj)
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        - name: Create GitHub Release
+          env:
+            GH_TOKEN: ${{ github.token }}
+          run: |
+            VERSION="${{ steps.get_version.outputs.version }}"
+            gh release create "v$VERSION" ./nupkgs/*.nupkg \
+              --title "v$VERSION" \
+              --generate-notes
