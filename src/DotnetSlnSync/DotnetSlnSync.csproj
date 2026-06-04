@@ -8,8 +8,10 @@
 
 	  <PackAsTool>true</PackAsTool>
     <IsPublishable>true</IsPublishable>
-    <ToolCommandName>dotnet-slnsync</ToolCommandName>
-    <PackageOutputPath>$(SolutionDir)/nupkg/</PackageOutputPath>
+    <ToolCommandName>dotnet-sln-sync</ToolCommandName>
+    <PackageOutputPath>$(SolutionDir)nupkg/</PackageOutputPath>
+    <PackageId>dotnet-sln-sync</PackageId>
+    <AssemblyName>dotnet-sln-sync</AssemblyName>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>2.0.0</Version>
     <Authors>Eduardo Villalpando</Authors>

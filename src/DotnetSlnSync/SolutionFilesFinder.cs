@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SolutionSync;
+namespace DotnetSlnSync;
 
 internal static class SolutionFilesFinder
 {
