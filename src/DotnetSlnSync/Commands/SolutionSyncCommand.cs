@@ -18,6 +18,28 @@ internal class SolutionSyncCommand(
     private bool hasDifferences = false;
     private bool hasChanges = false;
 
+    private static string ResolveProjectPathRelativeToSolution(string projectFilePath, SolutionModel sourceSolution, SolutionModel destinationSolution)
+    {
+        string? sourceSolutionPath = sourceSolution.Description;
+        string? destinationSolutionPath = destinationSolution.Description;
+
+        if (string.IsNullOrEmpty(sourceSolutionPath) || string.IsNullOrEmpty(destinationSolutionPath))
+        {
+            return projectFilePath;
+        }
+
+        string sourceSolutionDirectory = Path.GetDirectoryName(Path.GetFullPath(sourceSolutionPath)) ?? string.Empty;
+        string destinationSolutionDirectory = Path.GetDirectoryName(Path.GetFullPath(destinationSolutionPath)) ?? string.Empty;
+
+        string normalizedProjectFilePath = projectFilePath
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar);
+
+        string absoluteProjectPath = Path.GetFullPath(Path.Combine(sourceSolutionDirectory, normalizedProjectFilePath));
+
+        return Path.GetRelativePath(destinationSolutionDirectory, absoluteProjectPath);
+    }
+
     private static void PrintDiff<T>((string Included, string Excluded, T obj) item, string aName, string bName, Func<T, string>? toStringFunc = null)
     {
         string aNameQualifier = item.Included == aName ? "\x1b[0;32m+" : "\x1b[0;31m-";
@@ -140,7 +162,7 @@ internal class SolutionSyncCommand(
             "Projects",
             solutionModelPair,
             (s, p) => s.AddProject(
-                p.FilePath,
+                ResolveProjectPathRelativeToSolution(p.FilePath, p.Solution, s),
                 p.Type,
                 p.Parent != null ? s.FindFolder(p.Parent.Path) : null),
             (s, p) => s.RemoveProject(p),
