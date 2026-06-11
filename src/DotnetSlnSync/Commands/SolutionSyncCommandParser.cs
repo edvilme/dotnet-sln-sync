@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Builder;
+using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Linq;
@@ -13,7 +15,7 @@ public class SolutionSyncCommandParser
 {
     public static Parser CommandParser;
 
-    public static RootCommand RootCommand = new RootCommand("dotnet sln-sync");
+    public static RootCommand RootCommand = new RootCommand("Use this .NET tool to manually sync .sln and .slnx solution files.");
 
     public static Argument<string[]> SolutionFilesPathsArgument = new Argument<string[]>("SolutionFiles")
     {
@@ -38,6 +40,19 @@ public class SolutionSyncCommandParser
             return new SolutionSyncCommand(parseResult).ExecuteAsync();
         });
 
-        CommandParser = new Parser(RootCommand);
+        CommandParser = new CommandLineBuilder(RootCommand)
+            .UseHelp(context =>
+            {
+                context.HelpBuilder.CustomizeLayout(_ =>
+                    HelpBuilder.Default.GetLayout().Append(WriteExamplesSection));
+            })
+            .Build();
+    }
+
+    private static void WriteExamplesSection(HelpContext context)
+    {
+        context.Output.WriteLine("Examples:");
+        context.Output.WriteLine("  dotnet sln-sync [<DIRECTORY>] [--diff-only]");
+        context.Output.WriteLine("  dotnet sln-sync <FILE_OR_DIR> <FILE_OR_DIR> [--diff-only]");
     }
 }
